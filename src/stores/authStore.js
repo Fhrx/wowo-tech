@@ -1,91 +1,128 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import bcrypt from "bcryptjs";
-import { v4 as uuidv4 } from "uuid";
+// src/stores/authStore.js
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-const ADMIN_CREDENTIAL = {
-  email: "admin@wowotech.dev",
-  password: bcrypt.hashSync("admin123", 10),
-  fullName: "Admin WowoTech",
-  role: "admin",
-};
-
-const DEMO_USER = {
-  email: "user@wowotech.dev",
-  password: bcrypt.hashSync("user123", 10),
-  fullName: "Demo User",
-  role: "user",
-};
-
-const initialUsers = [
-  {
-    id: uuidv4(),
-    ...ADMIN_CREDENTIAL,
-    createdAt: Date.now(),
-  },
-  {
-    id: uuidv4(),
-    ...DEMO_USER,
-    createdAt: Date.now(),
-  },
-];
-
-const useAuthStore = create(
+export const useAuthStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
-      users: initialUsers,
       isAuthenticated: false,
+      
+      login: (email, password) => {
+        // Mock users database
+        const mockUsers = [
+          {
+            id: '1',
+            email: 'admin@wowotech.dev',
+            password: 'Admin123!', // Plain password untuk demo
+            fullName: 'Admin WowoTech',
+            role: 'admin',
+            avatar: null,
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: '2',
+            email: 'user@wowotech.dev',
+            password: 'User123!', // Plain password untuk demo
+            fullName: 'Demo User',
+            role: 'user',
+            avatar: null,
+            createdAt: new Date().toISOString()
+          }
+        ];
 
-      register: ({ email, password, fullName }) => {
-        const users = get().users;
-        const exists = users.find((u) => u.email === email);
-
-        if (exists) throw new Error("Email sudah terdaftar");
-
-        const newUser = {
-          id: uuidv4(),
-          email,
-          fullName,
-          password: bcrypt.hashSync(password, 10),
-          role: "user",
-          createdAt: Date.now(),
-        };
-
-        set({
-          users: [...users, newUser],
-          user: newUser,
-          isAuthenticated: true,
-        });
-
-        return newUser.role;
-      },
-
-      login: ({ email, password }) => {
-        if (!email || !password) {
-          throw new Error("Email dan password wajib diisi");
+        // Find user
+        const user = mockUsers.find(u => 
+          u.email === email && u.password === password
+        );
+        
+        if (user) {
+          // Remove password from user object before storing
+          const { password: _, ...userWithoutPassword } = user;
+          
+          set({ 
+            user: userWithoutPassword, 
+            isAuthenticated: true 
+          });
+          
+          // RETURN OBJECT dengan success dan role
+          return { 
+            success: true, 
+            user: userWithoutPassword,
+            role: user.role 
+          };
         }
-
-        const user = get().users.find((u) => u.email === email);
-        if (!user) throw new Error("User tidak ditemukan");
-
-        const match = bcrypt.compareSync(password, user.password);
-        if (!match) throw new Error("Password salah");
-
-        set({
-          user,
-          isAuthenticated: true,
-        });
-
-        return user.role;
+        
+        // RETURN OBJECT dengan error
+        return { 
+          success: false, 
+          error: 'Email atau password salah' 
+        };
       },
-
+      
+      register: (userData) => {
+        const newUser = {
+          id: Date.now().toString(),
+          ...userData,
+          role: 'user', // Default role
+          avatar: null,
+          createdAt: new Date().toISOString()
+        };
+        
+        set({ 
+          user: newUser, 
+          isAuthenticated: true 
+        });
+        
+        // RETURN OBJECT
+        return { 
+          success: true, 
+          user: newUser,
+          role: 'user' 
+        };
+      },
+      
       logout: () => {
         set({ user: null, isAuthenticated: false });
       },
+      
+      // Quick login untuk development
+      quickLogin: (role = 'user') => {
+        const demoUsers = {
+          admin: {
+            id: '1',
+            email: 'admin@wowotech.dev',
+            fullName: 'Admin WowoTech',
+            role: 'admin',
+            avatar: null,
+            createdAt: new Date().toISOString()
+          },
+          user: {
+            id: '2',
+            email: 'user@wowotech.dev',
+            fullName: 'Demo User',
+            role: 'user',
+            avatar: null,
+            createdAt: new Date().toISOString()
+          }
+        };
+        
+        set({ 
+          user: demoUsers[role], 
+          isAuthenticated: true 
+        });
+        
+        return { 
+          success: true, 
+          user: demoUsers[role],
+          role 
+        };
+      }
     }),
-    { name: "wowotech-auth" }
+    {
+      name: 'wowotech-auth', // Key untuk localStorage
+    }
   )
 );
 
-export default useAuthStore;
+  export default useAuthStore;

@@ -1,4 +1,5 @@
-import useAuthStore from "../authStore";
+// src/stores/hooks/useAuth.js
+import { useAuthStore } from '../authStore';
 
 export default function useAuth() {
   const {
@@ -7,6 +8,7 @@ export default function useAuth() {
     login,
     logout,
     register,
+    quickLogin
   } = useAuthStore();
 
   return {
@@ -15,6 +17,7 @@ export default function useAuth() {
     login,
     logout,
     register,
+    quickLogin,
     isAdmin: user?.role === "admin",
   };
 }
