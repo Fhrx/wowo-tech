@@ -1,10 +1,20 @@
 // src/App.jsx
-import AppRouter from "./router/AppRouter";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
+import AppRouter from "./router/AppRouter";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 export default function App() {
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -13,25 +23,11 @@ export default function App() {
             background: '#1a1a1a',
             color: '#fff',
             border: '1px solid #dc2626',
-            borderRadius: '12px',
-            fontSize: '14px',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
-          },
-          success: {
-            iconTheme: {
-              primary: '#22c55e',
-              secondary: '#fff',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff',
-            },
+            borderRadius: '10px',
           },
         }}
       />
       <AppRouter />
-    </>
+    </QueryClientProvider>
   );
 }
