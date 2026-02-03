@@ -129,28 +129,6 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* Search Bar */}
-            <div className="hidden md:flex flex-1 max-w-md mx-6">
-              <form onSubmit={handleSearch} className="w-full">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Cari produk, komponen, atau brand..."
-                    className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent dark:text-white"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-red-600"
-                  >
-                    <Search className="w-4 h-4" />
-                  </button>
-                </div>
-              </form>
-            </div>
-
             {/* Right Side Actions */}
             <div className="flex items-center space-x-4">
               {/* Theme Toggle Button */}

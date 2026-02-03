@@ -9,6 +9,7 @@ import RegisterPage from "../pages/public/RegisterPage"
 
 // ================= USER =================
 import ProductsPage from "../pages/user/ProductsPage"
+import ProductDetailPage from "../pages/user/ProductDetailPage"
 import ProfilePage from "../pages/user/ProfilePage"
 import CartPage from "../pages/user/CartPage"
 import OrderHistoryPage from "../pages/user/OrderHistoryPage"
@@ -37,6 +38,7 @@ export default function AppRouter() {
       <Route element={<ProtectedRoute />}>
         <Route element={<UserLayout />}>
           <Route path="/products" element={<ProductsPage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/orders" element={<OrderHistoryPage />} />

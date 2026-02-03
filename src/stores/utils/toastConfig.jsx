@@ -18,11 +18,15 @@ const getBaseToastStyle = () => {
     borderRadius: '10px',
     fontSize: '14px',
     fontWeight: '500',
-    padding: '16px',
+    padding: '17px',
     boxShadow: isDarkMode 
       ? '0 8px 25px rgba(0, 0, 0, 0.4)' 
       : '0 8px 25px rgba(0, 0, 0, 0.1)',
     maxWidth: '420px',
+    marginTop: '16px',
+    marginRight: '16px',
+    top: '80px', // Offset dari navbar
+    gap: '8px', // Jarak antar toast
   };
 };
 
@@ -117,7 +121,7 @@ export const toastWarning = (message, options = {}) => {
       borderLeft: `4px solid ${colors.border}`,
       background: colors.gradient,
     },
-    icon: '⚠️', // Built-in warning icon
+    icon: <WarningIcon />, // Icon component
     ...options
   });
 };
@@ -133,7 +137,7 @@ export const toastInfo = (message, options = {}) => {
       borderLeft: `4px solid ${colors.border}`,
       background: colors.gradient,
     },
-    icon: 'ℹ️', // Built-in info icon
+    icon: <InfoIcon />, // Icon component
     ...options
   });
 };

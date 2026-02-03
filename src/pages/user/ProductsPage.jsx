@@ -1,13 +1,14 @@
-// src/pages/user/ProductsPage.jsx
+// src/pages/user/ProductsPage.jsx - UPDATED
 import { useState } from "react";
-import { Search, Filter, Grid, List, ChevronDown, Package, Zap } from "lucide-react";
+import { Search, Filter, Grid, List, ChevronDown, Package, Zap, Table } from "lucide-react";
 import ProductGrid from "../../components/product/ProductGrid";
+import ProductTable from "../../components/product/ProductTable"; // ← IMPORT BARU
 import useProducts from "../../stores/hooks/useProducts";
 
 export default function ProductsPage() {
   const { data: products = [], isLoading, error } = useProducts();
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
+  const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'table'
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("latest");
 
@@ -105,26 +106,36 @@ export default function ProductsPage() {
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             </div>
 
-            {/* View Toggle */}
+            {/* View Toggle - UPDATED */}
             <div className="flex gap-2 bg-gray-100 dark:bg-gray-900 p-1 rounded-xl">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg ${viewMode === "grid" ? "bg-white dark:bg-gray-800 shadow" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === "grid" 
+                  ? "bg-white dark:bg-gray-800 shadow text-red-600 dark:text-red-400" 
+                  : "hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                }`}
+                title="Grid View"
               >
-                <Grid className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <Grid className="w-5 h-5" />
+                <span className="text-sm font-medium hidden sm:inline">Grid</span>
               </button>
               <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg ${viewMode === "list" ? "bg-white dark:bg-gray-800 shadow" : "hover:bg-gray-200 dark:hover:bg-gray-700"}`}
+                onClick={() => setViewMode("table")}
+                className={`p-2 rounded-lg flex items-center gap-2 transition-all ${viewMode === "table" 
+                  ? "bg-white dark:bg-gray-800 shadow text-red-600 dark:text-red-400" 
+                  : "hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
+                }`}
+                title="Table View"
               >
-                <List className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                <Table className="w-5 h-5" />
+                <span className="text-sm font-medium hidden sm:inline">Table</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Results Info */}
-        <div className="flex justify-between items-center mb-6">
+        {/* Results Info - UPDATED */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               {filteredProducts.length} Products Found
@@ -132,21 +143,56 @@ export default function ProductsPage() {
             <p className="text-gray-600 dark:text-gray-400">
               {searchQuery && `Search results for "${searchQuery}"`}
               {!searchQuery && selectedCategory !== "all" && `Showing ${selectedCategory} products`}
+              {!searchQuery && selectedCategory === "all" && `Viewing in ${viewMode} mode`}
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <Zap className="w-4 h-4 text-red-500" />
-            <span>Free shipping on orders above Rp 1.000.000</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <Zap className="w-4 h-4 text-red-500" />
+              <span className="hidden sm:inline">Free shipping on orders above Rp 1.000.000</span>
+              <span className="inline sm:hidden">Free shipping Rp 1M</span>
+            </div>
+            
+            {/* View Mode Indicator */}
+            <div className={`px-3 py-1.5 rounded-lg text-sm font-medium ${viewMode === "grid" 
+              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300" 
+              : "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300"
+            }`}>
+              {viewMode === "grid" ? "Grid View" : "Table View"}
+            </div>
           </div>
         </div>
 
-        {/* Products Grid */}
-        <ProductGrid
-          products={sortedProducts}
-          isLoading={isLoading}
-          error={error}
-        />
+        {/* Conditional Rendering based on View Mode */}
+        {viewMode === "grid" ? (
+          <ProductGrid
+            products={sortedProducts}
+            isLoading={isLoading}
+            error={error}
+          />
+        ) : (
+          <ProductTable
+            products={sortedProducts}
+            isLoading={isLoading}
+            error={error}
+          />
+        )}
+
+        {/* View Mode Help Text */}
+        {sortedProducts.length > 0 && (
+          <div className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            <p>
+              {viewMode === "grid" 
+                ? "Grid view is great for browsing products visually." 
+                : "Table view is perfect for comparing product specifications."
+              }
+            </p>
+            <p className="mt-1">
+              Showing {sortedProducts.length} of {products.length} total products
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
