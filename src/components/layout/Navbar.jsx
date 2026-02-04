@@ -1,4 +1,3 @@
-// src/components/layout/Navbar.jsx - UPDATE BAGIAN THEME
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -16,19 +15,21 @@ import {
   Zap
 } from "lucide-react";
 import useAuth from "../../stores/hooks/useAuth";
-import useTheme from "../../stores/hooks/useTheme"; // ← IMPORT BARU
+import useTheme from "../../stores/hooks/useTheme";
+import useCart from "../../stores/hooks/useCart"; // ⭐ IMPORT useCart ⭐
 import { wowotechToast } from "../../stores/utils/toastConfig.jsx";
 
 export default function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
-  const { isDarkMode, toggleTheme } = useTheme(); // ← PAKAI useTheme HOOK
+  const { isDarkMode, toggleTheme } = useTheme();
+  const { getTotalItems } = useCart(); // ⭐ GET cart total items ⭐
   const navigate = useNavigate();
   const location = useLocation();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // HAPUS useEffect yang lama!
+  const cartItemCount = getTotalItems(); // ⭐ GET REAL CART COUNT ⭐
 
   const handleThemeToggle = () => {
     toggleTheme();
@@ -78,10 +79,10 @@ export default function Navbar() {
 
   return (
     <>
-        <nav className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-md">
-          <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-          {/* Logo & Brand */}
+      <nav className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-md">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo & Brand */}
             <div className="flex items-center">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -119,8 +120,8 @@ export default function Navbar() {
                   key={link.path}
                   to={link.path}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === link.path
-                      ? "bg-red-600 text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    ? "bg-red-600 text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
                 >
                   {link.icon}
@@ -133,7 +134,7 @@ export default function Navbar() {
             <div className="flex items-center space-x-4">
               {/* Theme Toggle Button */}
               <button
-                onClick={handleThemeToggle} // ← PAKAI handleThemeToggle
+                onClick={handleThemeToggle}
                 className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors group"
                 aria-label="Toggle theme"
               >
@@ -144,23 +145,25 @@ export default function Navbar() {
                 )}
               </button>
 
-              {/* Cart Icon */}
               <Link
                 to="/cart"
-                className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 relative"
+                className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 relative transition-colors"
               >
                 <ShoppingCart className="w-6 h-6" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
+                {/* Tampilkan badge hanya jika ada item di cart */}
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                    {cartItemCount > 99 ? '99+' : cartItemCount}
+                  </span>
+                )}
               </Link>
 
               {/* User Menu */}
               {isAuthenticated ? (
                 <div className="relative group">
                   <button className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-                    <div className="w-8 h-8 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      {user?.fullName?.charAt(0).toUpperCase() || "U"}
                     </div>
                     <span className="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-300">
                       {user?.fullName?.split(" ")[0] || "User"}
@@ -173,7 +176,7 @@ export default function Navbar() {
                   </button>
 
                   {/* Dropdown Menu */}
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                       <p className="font-medium text-gray-900 dark:text-white">{user?.fullName}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
@@ -188,15 +191,24 @@ export default function Navbar() {
                         <Link
                           key={link.path}
                           to={link.path}
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                         >
                           {link.icon}
                           {link.label}
                         </Link>
                       ))}
+
+                      {/* Cart Item Count di Dropdown */}
+                      <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 flex items-center justify-between">
+                        <span>Cart Items:</span>
+                        <span className="font-bold text-red-600 dark:text-red-400">
+                          {cartItemCount} item{cartItemCount !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+
                       <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 mt-2"
+                        className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 mt-2 transition-colors"
                       >
                         <LogOut className="w-4 h-4" />
                         Logout
@@ -242,8 +254,8 @@ export default function Navbar() {
                   to={link.path}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium ${location.pathname === link.path
-                      ? "bg-red-600 text-white"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    ? "bg-red-600 text-white"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                     }`}
                 >
                   {link.icon}
@@ -251,21 +263,40 @@ export default function Navbar() {
                 </Link>
               ))}
 
+              {/* Cart Link dengan Count di Mobile */}
+              <Link
+                to="/cart"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <div className="flex items-center gap-3">
+                  <ShoppingCart className="w-5 h-5" />
+                  Cart
+                </div>
+                {cartItemCount > 0 && (
+                  <span className="w-6 h-6 bg-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                    {cartItemCount}
+                  </span>
+                )}
+              </Link>
+
               {isAuthenticated && (
                 <>
                   <div className="border-t border-gray-200 dark:border-gray-800 my-2 pt-2">
                     <p className="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">ACCOUNT</p>
-                    {userLinks.map((link) => (
-                      <Link
-                        key={link.path}
-                        to={link.path}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                      >
-                        {link.icon}
-                        {link.label}
-                      </Link>
-                    ))}
+                    {userLinks
+                      .filter(link => link.path !== "/cart") // Filter out cart karena sudah ditampilkan di atas
+                      .map((link) => (
+                        <Link
+                          key={link.path}
+                          to={link.path}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        >
+                          {link.icon}
+                          {link.label}
+                        </Link>
+                      ))}
                   </div>
                   <button
                     onClick={handleLogout}
@@ -284,8 +315,8 @@ export default function Navbar() {
       {/* Theme Status Indicator */}
       <div className="fixed bottom-4 right-4 z-40">
         <div className={`flex items-center gap-2 px-3 py-2 rounded-full shadow-lg transition-all duration-300 ${isDarkMode
-            ? "bg-gray-900 text-gray-300 border border-gray-800"
-            : "bg-white text-gray-700 border border-gray-200"
+          ? "bg-gray-900 text-gray-300 border border-gray-800"
+          : "bg-white text-gray-700 border border-gray-200"
           }`}>
           {isDarkMode ? (
             <>

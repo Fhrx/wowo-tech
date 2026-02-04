@@ -12,6 +12,9 @@ import ProductsPage from "../pages/user/ProductsPage"
 import ProductDetailPage from "../pages/user/ProductDetailPage"
 import ProfilePage from "../pages/user/ProfilePage"
 import CartPage from "../pages/user/CartPage"
+import CheckoutPage from "../pages/user/CheckoutPage"
+import PaymentPage from "../pages/user/PaymentPage"
+import OrderSuccessPage from "../pages/user/OrderSuccesPage"
 import OrderHistoryPage from "../pages/user/OrderHistoryPage"
 import InvoicePage from "../pages/user/InvoicePage"
 
@@ -41,6 +44,9 @@ export default function AppRouter() {
           <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/order-success" element={<OrderSuccessPage />} />
           <Route path="/orders" element={<OrderHistoryPage />} />
           <Route path="/invoice/:orderId" element={<InvoicePage />} />
         </Route>

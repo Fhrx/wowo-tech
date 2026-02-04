@@ -7,16 +7,21 @@ const useOrderStore = create(
       orders: [],
 
       createOrder: (order) =>
-        set({
-          orders: [
-            ...get().orders,
-            {
-              ...order,
-              id: Date.now().toString(),
-              status: "Menunggu Pembayaran",
-              createdAt: new Date().toISOString(),
-            },
-          ],
+        set((state) => {
+          // Ensure order has proper ID
+          const orderWithId = {
+            ...order,
+            id: order.id || `WOWO-${Date.now().toString().slice(-8)}`,
+            status: order.status || "Menunggu Pembayaran",
+            createdAt: order.createdAt || new Date().toISOString(),
+          };
+          
+          const newOrders = [...state.orders, orderWithId];
+          
+          // Also save to localStorage with specific key for InvoicePage
+          localStorage.setItem(`wowotech-order-${orderWithId.id}`, JSON.stringify(orderWithId));
+          
+          return { orders: newOrders };
         }),
 
       updateStatus: (id, status) =>
@@ -26,7 +31,10 @@ const useOrderStore = create(
           ),
         }),
     }),
-    { name: "order-storage" }
+    { 
+      name: "order-storage",
+      getStorage: () => localStorage 
+    }
   )
 )
 
